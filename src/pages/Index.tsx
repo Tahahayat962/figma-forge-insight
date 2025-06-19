@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,17 +22,26 @@ const Index = () => {
   }, []);
 
   const validateFigmaUrl = (url) => {
-    // Flexible URL validation for Figma links
-    const figmaPatterns = [
-      /^https:\/\/www\.figma\.com\//,
-      /^https:\/\/figma\.com\//,
-      /figma\.com/,
-      /\/file\//,
-      /\/proto\//,
-      /\/design\//
-    ];
+    // More flexible URL validation for Figma links
+    const normalizedUrl = url.toLowerCase().trim();
     
-    return figmaPatterns.some(pattern => pattern.test(url)) || url.includes('figma');
+    // Check if it contains figma.com and is a valid URL format
+    if (!normalizedUrl.includes('figma.com')) {
+      return false;
+    }
+    
+    // Basic URL structure check
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      // If not a valid URL, check if it at least looks like a Figma URL
+      return normalizedUrl.includes('figma.com') && (
+        normalizedUrl.includes('/file/') || 
+        normalizedUrl.includes('/proto/') || 
+        normalizedUrl.includes('/design/')
+      );
+    }
   };
 
   const analyzeFigmaFile = async () => {
