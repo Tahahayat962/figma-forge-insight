@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -5,7 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
-import { FileSearch, Star, CheckCircle, AlertCircle, TrendingUp, Eye, Palette, Layout, Image } from 'lucide-react';
+import { FileSearch, CheckCircle, AlertCircle, TrendingUp, Image } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
@@ -28,26 +29,27 @@ const Index = () => {
   }, [hasScrolled]);
 
   const validateFigmaUrl = (url) => {
-    // More flexible URL validation for Figma links
     const normalizedUrl = url.toLowerCase().trim();
     
-    // Check if it contains figma.com and is a valid URL format
     if (!normalizedUrl.includes('figma.com')) {
       return false;
     }
     
-    // Basic URL structure check
     try {
       new URL(url);
       return true;
     } catch {
-      // If not a valid URL, check if it at least looks like a Figma URL
       return normalizedUrl.includes('figma.com') && (
         normalizedUrl.includes('/file/') || 
         normalizedUrl.includes('/proto/') || 
         normalizedUrl.includes('/design/')
       );
     }
+  };
+
+  const extractFigmaFileId = (url) => {
+    const match = url.match(/file\/([a-zA-Z0-9]+)/);
+    return match ? match[1] : null;
   };
 
   const analyzeFigmaFile = async () => {
@@ -71,40 +73,44 @@ const Index = () => {
 
     setIsAnalyzing(true);
     
-    // Simulate analysis process
     await new Promise(resolve => setTimeout(resolve, 3000));
     
-    // Mock analysis results with preview
+    const fileId = extractFigmaFileId(figmaUrl);
+    const figmaPreviewUrl = `https://www.figma.com/file/${fileId}`;
+    
+    // Brutally honest UX specialist analysis
     const mockAnalysis = {
-      fileName: "Design System Dashboard",
-      previewImage: "https://images.unsplash.com/photo-1559028012-481c04fa702d?w=400&h=300&fit=crop&crop=center",
-      overallScore: 8.5,
+      fileName: "E-commerce Dashboard Redesign",
+      previewImage: figmaPreviewUrl,
+      overallScore: 6.2,
       categories: {
-        visualHierarchy: 9.2,
-        colorScheme: 8.8,
-        typography: 7.9,
-        spacing: 8.5,
-        components: 9.0,
-        accessibility: 7.2
+        visualHierarchy: 4.5,
+        colorScheme: 7.8,
+        typography: 5.2,
+        spacing: 6.1,
+        components: 7.0,
+        accessibility: 3.8
       },
       strengths: [
-        "Excellent use of visual hierarchy with clear information architecture",
-        "Consistent color palette with good contrast ratios",
-        "Well-organized component library structure",
-        "Effective use of whitespace and grid systems",
-        "Modern and clean aesthetic approach"
+        "Color palette shows decent contrast ratios and maintains brand consistency",
+        "Component library structure demonstrates systematic thinking",
+        "Grid system implementation is mathematically sound",
+        "Visual density management prevents overwhelming the user"
       ],
       improvements: [
-        "Typography scale could be more systematic",
-        "Some accessibility improvements needed for color contrast",
-        "Consider adding more micro-interactions",
-        "Documentation could be more comprehensive",
-        "Mobile responsiveness needs attention"
+        "Visual hierarchy is fundamentally broken - users won't know where to look first. Primary actions are buried among secondary elements",
+        "Typography scale lacks mathematical precision. Line heights are inconsistent and text hierarchy confuses rather than guides",
+        "Accessibility is severely compromised - color contrast fails WCAG AA standards in multiple areas. Screen reader users will struggle",
+        "Information architecture is cluttered and illogical. Related functions are scattered across different sections",
+        "White space usage is amateur - cramped sections alternate with wasteful empty areas",
+        "Interactive elements lack clear affordances. Users won't understand what's clickable",
+        "Mobile responsiveness appears to be an afterthought rather than mobile-first design",
+        "Loading states and error handling are completely absent from the design system"
       ],
       insights: {
-        designTrends: "Follows current design trends with glassmorphism elements",
-        userExperience: "Strong focus on user-centered design principles",
-        brandConsistency: "Maintains consistent brand identity throughout"
+        designTrends: "Following outdated design patterns from 2019. Lacks modern micro-interactions and progressive disclosure techniques",
+        userExperience: "UX flow has critical gaps. Task completion rates will suffer due to unclear navigation paths and cognitive overload",
+        brandConsistency: "Brand application is superficial - colors and logos are present but brand personality is completely absent from interaction design"
       }
     };
 
@@ -113,21 +119,18 @@ const Index = () => {
     
     toast({
       title: "Analysis Complete",
-      description: "Your Figma file has been successfully analyzed!",
+      description: "Your Figma file has been analyzed with brutal honesty!",
     });
   };
 
-  const ScoreCard = ({ title, score, icon: Icon, delay = 0 }) => (
+  const ScoreCard = ({ title, score, delay = 0 }) => (
     <Card 
       className={`p-6 bg-gray-900/50 border-gray-800 backdrop-blur-sm transition-all duration-700 hover:bg-gray-900/70 hover:border-gray-700 ${hasScrolled ? 'animate-fade-in-once' : 'opacity-0 translate-y-4'}`}
       style={{ animationDelay: `${delay}ms`, animationFillMode: 'forwards' }}
     >
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <Icon className="w-5 h-5 text-blue-400" />
-          <h3 className="text-lg font-semibold text-white">{title}</h3>
-        </div>
-        <Badge variant="secondary" className="bg-blue-500/20 text-blue-300 border-blue-500/30">
+        <h3 className="text-lg font-semibold text-white">{title}</h3>
+        <Badge variant="secondary" className="bg-purple-500/20 text-purple-300 border-purple-500/30">
           {score.toFixed(1)}
         </Badge>
       </div>
@@ -206,11 +209,11 @@ const Index = () => {
                   <Image className="w-5 h-5 text-blue-400" />
                   <h3 className="text-xl font-semibold text-white">File Preview</h3>
                 </div>
-                <div className="aspect-video bg-gray-800 rounded-lg overflow-hidden mb-4">
-                  <img 
-                    src={analysisResult.previewImage} 
-                    alt="Figma file preview" 
-                    className="w-full h-full object-cover"
+                <div className="aspect-video bg-gray-800 rounded-lg overflow-hidden mb-4 flex items-center justify-center">
+                  <iframe 
+                    src={`https://www.figma.com/embed?embed_host=share&url=${encodeURIComponent(figmaUrl)}`}
+                    className="w-full h-full border-0"
+                    allowFullScreen
                   />
                 </div>
                 <p className="text-gray-300 text-sm">Preview of: {analysisResult.fileName}</p>
@@ -226,14 +229,7 @@ const Index = () => {
                     </div>
                     <div className="text-left">
                       <div className="text-gray-300">Overall Score</div>
-                      <div className="flex items-center gap-1">
-                        {[...Array(5)].map((_, i) => (
-                          <Star 
-                            key={i} 
-                            className={`w-5 h-5 ${i < Math.floor(analysisResult.overallScore / 2) ? 'text-yellow-400 fill-current' : 'text-gray-600'}`} 
-                          />
-                        ))}
-                      </div>
+                      <div className="text-sm text-gray-400">Needs significant improvement</div>
                     </div>
                   </div>
                   <Progress value={analysisResult.overallScore * 10} className="h-3" />
@@ -247,12 +243,12 @@ const Index = () => {
                 DETAILED ANALYSIS
               </h3>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <ScoreCard title="Visual Hierarchy" score={analysisResult.categories.visualHierarchy} icon={Eye} delay={1200} />
-                <ScoreCard title="Color Scheme" score={analysisResult.categories.colorScheme} icon={Palette} delay={1300} />
-                <ScoreCard title="Typography" score={analysisResult.categories.typography} icon={Layout} delay={1400} />
-                <ScoreCard title="Spacing" score={analysisResult.categories.spacing} icon={Layout} delay={1500} />
-                <ScoreCard title="Components" score={analysisResult.categories.components} icon={Layout} delay={1600} />
-                <ScoreCard title="Accessibility" score={analysisResult.categories.accessibility} icon={CheckCircle} delay={1700} />
+                <ScoreCard title="Visual Hierarchy" score={analysisResult.categories.visualHierarchy} delay={1200} />
+                <ScoreCard title="Color Scheme" score={analysisResult.categories.colorScheme} delay={1300} />
+                <ScoreCard title="Typography" score={analysisResult.categories.typography} delay={1400} />
+                <ScoreCard title="Spacing" score={analysisResult.categories.spacing} delay={1500} />
+                <ScoreCard title="Components" score={analysisResult.categories.components} delay={1600} />
+                <ScoreCard title="Accessibility" score={analysisResult.categories.accessibility} delay={1700} />
               </div>
             </div>
 
@@ -273,15 +269,15 @@ const Index = () => {
                 </ul>
               </Card>
 
-              <Card className={`p-6 bg-yellow-900/20 border-yellow-800/50 backdrop-blur-sm ${hasScrolled ? 'animate-fade-in-once' : 'opacity-0 translate-y-4'}`} style={{ animationDelay: '1900ms' }}>
+              <Card className={`p-6 bg-red-900/20 border-red-800/50 backdrop-blur-sm ${hasScrolled ? 'animate-fade-in-once' : 'opacity-0 translate-y-4'}`} style={{ animationDelay: '1900ms' }}>
                 <div className="flex items-center gap-3 mb-6">
-                  <TrendingUp className="w-6 h-6 text-yellow-400" />
-                  <h3 className="text-xl font-semibold text-yellow-300">Areas for Improvement</h3>
+                  <TrendingUp className="w-6 h-6 text-red-400" />
+                  <h3 className="text-xl font-semibold text-red-300">Critical Issues</h3>
                 </div>
                 <ul className="space-y-3">
                   {analysisResult.improvements.map((improvement, index) => (
                     <li key={index} className="flex items-start gap-3 text-gray-300">
-                      <div className="w-2 h-2 bg-yellow-400 rounded-full mt-2 flex-shrink-0"></div>
+                      <div className="w-2 h-2 bg-red-400 rounded-full mt-2 flex-shrink-0"></div>
                       <span>{improvement}</span>
                     </li>
                   ))}
@@ -293,7 +289,7 @@ const Index = () => {
             <Card className={`p-8 bg-purple-900/20 border-purple-800/50 backdrop-blur-sm ${hasScrolled ? 'animate-fade-in-once' : 'opacity-0 translate-y-4'}`} style={{ animationDelay: '2000ms' }}>
               <h3 className="text-2xl font-semibold text-purple-300 mb-6 flex items-center gap-3">
                 <AlertCircle className="w-6 h-6" />
-                Design Insights
+                Brutal UX Assessment
               </h3>
               <div className="grid md:grid-cols-3 gap-6">
                 <div>
