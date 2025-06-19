@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
-import { FileSearch, Star, CheckCircle, AlertCircle, TrendingUp, Eye, Palette, Layout } from 'lucide-react';
+import { FileSearch, Star, CheckCircle, AlertCircle, TrendingUp, Eye, Palette, Layout, Image } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
@@ -13,13 +13,19 @@ const Index = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [scrollY, setScrollY] = useState(0);
+  const [hasScrolled, setHasScrolled] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+      if (window.scrollY > 100 && !hasScrolled) {
+        setHasScrolled(true);
+      }
+    };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [hasScrolled]);
 
   const validateFigmaUrl = (url) => {
     // More flexible URL validation for Figma links
@@ -68,9 +74,10 @@ const Index = () => {
     // Simulate analysis process
     await new Promise(resolve => setTimeout(resolve, 3000));
     
-    // Mock analysis results
+    // Mock analysis results with preview
     const mockAnalysis = {
       fileName: "Design System Dashboard",
+      previewImage: "https://images.unsplash.com/photo-1559028012-481c04fa702d?w=400&h=300&fit=crop&crop=center",
       overallScore: 8.5,
       categories: {
         visualHierarchy: 9.2,
@@ -112,7 +119,7 @@ const Index = () => {
 
   const ScoreCard = ({ title, score, icon: Icon, delay = 0 }) => (
     <Card 
-      className={`p-6 bg-gray-900/50 border-gray-800 backdrop-blur-sm transition-all duration-700 hover:bg-gray-900/70 hover:border-gray-700 transform translate-y-4 opacity-0 animate-fade-in`}
+      className={`p-6 bg-gray-900/50 border-gray-800 backdrop-blur-sm transition-all duration-700 hover:bg-gray-900/70 hover:border-gray-700 ${hasScrolled ? 'animate-fade-in-once' : 'opacity-0 translate-y-4'}`}
       style={{ animationDelay: `${delay}ms`, animationFillMode: 'forwards' }}
     >
       <div className="flex items-center justify-between mb-4">
@@ -144,21 +151,21 @@ const Index = () => {
       <div className="relative z-10 container mx-auto px-6 py-12">
         {/* Hero Section */}
         <div className="text-center mb-16 transform transition-transform duration-1000" style={{ transform: `translateY(${scrollY * 0.1}px)` }}>
-          <div className="inline-flex items-center gap-2 bg-blue-500/20 text-blue-300 px-4 py-2 rounded-full mb-6 animate-fade-in">
+          <div className="inline-flex items-center gap-2 bg-blue-500/20 text-blue-300 px-4 py-2 rounded-full mb-6 animate-fade-in-once">
             <FileSearch className="w-4 h-4" />
             <span className="text-sm font-medium">AI-Powered Design Analysis</span>
           </div>
           
-          <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent animate-fade-in" style={{ animationDelay: '200ms' }}>
-            Figma File Analyzer
+          <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent animate-fade-in-once font-impact" style={{ animationDelay: '200ms' }}>
+            UX PROTOTYPE ANALYZER
           </h1>
           
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-12 animate-fade-in" style={{ animationDelay: '400ms' }}>
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-12 animate-fade-in-once" style={{ animationDelay: '400ms' }}>
             Upload your Figma design files and get comprehensive AI-powered analysis with actionable insights to improve your designs.
           </p>
 
           {/* URL Input Section */}
-          <div className="max-w-2xl mx-auto mb-16 animate-fade-in" style={{ animationDelay: '600ms' }}>
+          <div className="max-w-2xl mx-auto mb-16 animate-fade-in-once" style={{ animationDelay: '600ms' }}>
             <div className="flex gap-4 p-2 bg-gray-900/50 backdrop-blur-sm rounded-xl border border-gray-800">
               <Input
                 type="url"
@@ -191,34 +198,53 @@ const Index = () => {
         {/* Analysis Results */}
         {analysisResult && (
           <div className="space-y-12">
-            {/* Overall Score */}
-            <Card className="p-8 bg-gradient-to-r from-gray-900/80 to-gray-800/80 border-gray-700 backdrop-blur-sm animate-fade-in" style={{ animationDelay: '800ms' }}>
-              <div className="text-center">
-                <h2 className="text-2xl font-bold mb-4 text-white">{analysisResult.fileName}</h2>
-                <div className="flex items-center justify-center gap-4 mb-6">
-                  <div className="text-6xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                    {analysisResult.overallScore}
-                  </div>
-                  <div className="text-left">
-                    <div className="text-gray-300">Overall Score</div>
-                    <div className="flex items-center gap-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star 
-                          key={i} 
-                          className={`w-5 h-5 ${i < Math.floor(analysisResult.overallScore / 2) ? 'text-yellow-400 fill-current' : 'text-gray-600'}`} 
-                        />
-                      ))}
+            {/* File Preview and Overall Score */}
+            <div className="grid lg:grid-cols-2 gap-8">
+              {/* File Preview */}
+              <Card className={`p-6 bg-gray-900/50 border-gray-800 backdrop-blur-sm ${hasScrolled ? 'animate-fade-in-once' : 'opacity-0 translate-y-4'}`} style={{ animationDelay: '800ms' }}>
+                <div className="flex items-center gap-3 mb-4">
+                  <Image className="w-5 h-5 text-blue-400" />
+                  <h3 className="text-xl font-semibold text-white">File Preview</h3>
+                </div>
+                <div className="aspect-video bg-gray-800 rounded-lg overflow-hidden mb-4">
+                  <img 
+                    src={analysisResult.previewImage} 
+                    alt="Figma file preview" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <p className="text-gray-300 text-sm">Preview of: {analysisResult.fileName}</p>
+              </Card>
+
+              {/* Overall Score */}
+              <Card className={`p-8 bg-gradient-to-r from-gray-900/80 to-gray-800/80 border-gray-700 backdrop-blur-sm ${hasScrolled ? 'animate-fade-in-once' : 'opacity-0 translate-y-4'}`} style={{ animationDelay: '900ms' }}>
+                <div className="text-center">
+                  <h2 className="text-2xl font-bold mb-4 text-white">{analysisResult.fileName}</h2>
+                  <div className="flex items-center justify-center gap-4 mb-6">
+                    <div className="text-6xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                      {analysisResult.overallScore}
+                    </div>
+                    <div className="text-left">
+                      <div className="text-gray-300">Overall Score</div>
+                      <div className="flex items-center gap-1">
+                        {[...Array(5)].map((_, i) => (
+                          <Star 
+                            key={i} 
+                            className={`w-5 h-5 ${i < Math.floor(analysisResult.overallScore / 2) ? 'text-yellow-400 fill-current' : 'text-gray-600'}`} 
+                          />
+                        ))}
+                      </div>
                     </div>
                   </div>
+                  <Progress value={analysisResult.overallScore * 10} className="h-3" />
                 </div>
-                <Progress value={analysisResult.overallScore * 10} className="h-3" />
-              </div>
-            </Card>
+              </Card>
+            </div>
 
             {/* Category Scores */}
             <div>
-              <h3 className="text-3xl font-bold mb-8 text-center bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent animate-fade-in" style={{ animationDelay: '1000ms' }}>
-                Detailed Analysis
+              <h3 className={`text-3xl font-bold mb-8 text-center bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent font-impact ${hasScrolled ? 'animate-fade-in-once' : 'opacity-0 translate-y-4'}`} style={{ animationDelay: '1000ms' }}>
+                DETAILED ANALYSIS
               </h3>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <ScoreCard title="Visual Hierarchy" score={analysisResult.categories.visualHierarchy} icon={Eye} delay={1200} />
@@ -232,7 +258,7 @@ const Index = () => {
 
             {/* Strengths and Improvements */}
             <div className="grid lg:grid-cols-2 gap-8">
-              <Card className="p-6 bg-green-900/20 border-green-800/50 backdrop-blur-sm animate-fade-in" style={{ animationDelay: '1800ms' }}>
+              <Card className={`p-6 bg-green-900/20 border-green-800/50 backdrop-blur-sm ${hasScrolled ? 'animate-fade-in-once' : 'opacity-0 translate-y-4'}`} style={{ animationDelay: '1800ms' }}>
                 <div className="flex items-center gap-3 mb-6">
                   <CheckCircle className="w-6 h-6 text-green-400" />
                   <h3 className="text-xl font-semibold text-green-300">What's Done Well</h3>
@@ -247,7 +273,7 @@ const Index = () => {
                 </ul>
               </Card>
 
-              <Card className="p-6 bg-yellow-900/20 border-yellow-800/50 backdrop-blur-sm animate-fade-in" style={{ animationDelay: '1900ms' }}>
+              <Card className={`p-6 bg-yellow-900/20 border-yellow-800/50 backdrop-blur-sm ${hasScrolled ? 'animate-fade-in-once' : 'opacity-0 translate-y-4'}`} style={{ animationDelay: '1900ms' }}>
                 <div className="flex items-center gap-3 mb-6">
                   <TrendingUp className="w-6 h-6 text-yellow-400" />
                   <h3 className="text-xl font-semibold text-yellow-300">Areas for Improvement</h3>
@@ -264,7 +290,7 @@ const Index = () => {
             </div>
 
             {/* Design Insights */}
-            <Card className="p-8 bg-purple-900/20 border-purple-800/50 backdrop-blur-sm animate-fade-in" style={{ animationDelay: '2000ms' }}>
+            <Card className={`p-8 bg-purple-900/20 border-purple-800/50 backdrop-blur-sm ${hasScrolled ? 'animate-fade-in-once' : 'opacity-0 translate-y-4'}`} style={{ animationDelay: '2000ms' }}>
               <h3 className="text-2xl font-semibold text-purple-300 mb-6 flex items-center gap-3">
                 <AlertCircle className="w-6 h-6" />
                 Design Insights
@@ -288,7 +314,7 @@ const Index = () => {
         )}
 
         {/* Footer */}
-        <div className="text-center mt-20 pt-12 border-t border-gray-800 animate-fade-in" style={{ animationDelay: '2200ms' }}>
+        <div className={`text-center mt-20 pt-12 border-t border-gray-800 ${hasScrolled ? 'animate-fade-in-once' : 'opacity-0 translate-y-4'}`} style={{ animationDelay: '2200ms' }}>
           <p className="text-gray-400">
             Powered by AI • Built with modern web technologies
           </p>
